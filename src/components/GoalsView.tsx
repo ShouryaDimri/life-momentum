@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Target, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { sounds } from '@/lib/sounds';
 
 interface Goal {
   id: string;
@@ -64,13 +65,26 @@ const GoalsView = () => {
   }, [user]);
 
   const toggleGoal = async (goalId: string, currentStatus: boolean) => {
+    // Optimistic update
+    const newStatus = !currentStatus;
+    setGoals(prev => prev.map(g => g.id === goalId ? { ...g, completed: newStatus } : g));
+    
+    // Play sound
+    if (newStatus) {
+      sounds.complete();
+    } else {
+      sounds.toggle();
+    }
+
     const { error } = await supabase
       .from('goals')
-      .update({ completed: !currentStatus })
+      .update({ completed: newStatus })
       .eq('id', goalId);
 
     if (error) {
       toast.error('Failed to update goal');
+      // Revert on error
+      setGoals(prev => prev.map(g => g.id === goalId ? { ...g, completed: currentStatus } : g));
     }
   };
 

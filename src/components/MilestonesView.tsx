@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Award, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { sounds } from '@/lib/sounds';
 
 interface Milestone {
   id: string;
@@ -82,13 +83,26 @@ const MilestonesView = () => {
   }, [user]);
 
   const toggleMilestone = async (milestoneId: string, currentStatus: boolean) => {
+    // Optimistic update
+    const newStatus = !currentStatus;
+    setMilestones(prev => prev.map(m => m.id === milestoneId ? { ...m, completed: newStatus } : m));
+    
+    // Play sound
+    if (newStatus) {
+      sounds.complete();
+    } else {
+      sounds.toggle();
+    }
+
     const { error } = await supabase
       .from('milestones')
-      .update({ completed: !currentStatus })
+      .update({ completed: newStatus })
       .eq('id', milestoneId);
 
     if (error) {
       toast.error('Failed to update milestone');
+      // Revert on error
+      setMilestones(prev => prev.map(m => m.id === milestoneId ? { ...m, completed: currentStatus } : m));
     }
   };
 

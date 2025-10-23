@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Bell, Clock } from 'lucide-react';
 import { toast } from 'sonner';
+import { sounds } from '@/lib/sounds';
 
 interface Task {
   id: string;
@@ -107,13 +108,26 @@ const TodayView = () => {
   }, [user, today]);
 
   const toggleTask = async (taskId: string, currentStatus: boolean) => {
+    // Optimistic update
+    const newStatus = !currentStatus;
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, completed: newStatus } : t));
+    
+    // Play sound
+    if (newStatus) {
+      sounds.complete();
+    } else {
+      sounds.toggle();
+    }
+
     const { error } = await supabase
       .from('tasks')
-      .update({ completed: !currentStatus })
+      .update({ completed: newStatus })
       .eq('id', taskId);
 
     if (error) {
       toast.error('Failed to update task');
+      // Revert on error
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, completed: currentStatus } : t));
     }
   };
 

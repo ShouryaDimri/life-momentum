@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { sounds } from '@/lib/sounds';
 
 interface AddItemModalProps {
   open: boolean;
@@ -39,6 +40,7 @@ const AddItemModal = ({ open, onOpenChange }: AddItemModalProps) => {
     if (error) {
       toast.error('Failed to add task');
     } else {
+      sounds.add();
       toast.success('Task added!');
       onOpenChange(false);
     }
@@ -64,6 +66,7 @@ const AddItemModal = ({ open, onOpenChange }: AddItemModalProps) => {
     if (error) {
       toast.error('Failed to add time block');
     } else {
+      sounds.add();
       toast.success('Time block added!');
       onOpenChange(false);
     }
@@ -88,6 +91,7 @@ const AddItemModal = ({ open, onOpenChange }: AddItemModalProps) => {
     if (error) {
       toast.error('Failed to add goal');
     } else {
+      sounds.add();
       toast.success('Goal added!');
       onOpenChange(false);
     }
@@ -111,6 +115,7 @@ const AddItemModal = ({ open, onOpenChange }: AddItemModalProps) => {
     if (error) {
       toast.error('Failed to add milestone');
     } else {
+      sounds.add();
       toast.success('Milestone added!');
       onOpenChange(false);
     }
